@@ -31,7 +31,8 @@ export const formatCurrencyMillions = (value: number): string => {
  * @param value Prozentwert
  * @returns Formatierter String (z.B. "8,5%")
  */
-export const formatPercentage = (value: number): string => {
+export const formatPercentage = (value: number | null): string => {
+  if (value === null) return '-';
   return `${value.toFixed(1)}%`;
 };
 

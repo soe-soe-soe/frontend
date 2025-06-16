@@ -48,8 +48,8 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
     status: 'Entwurf',
     gewinnProAnnum: 0,
     investitionsvolumen: 0,
-    ekQuote: 30,
-    fkZins: 4.0,
+    ekQuote: 0,
+    fkZins: 0,
     roi: 0
   });
 
@@ -132,62 +132,50 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
 
-    // Basic field validation
+    // Nur Name ist verpflichtend
     if (!isNotEmpty(formData.name)) {
       newErrors.name = 'Projektname ist erforderlich';
     }
     
-    if (!isNotEmpty(formData.standort)) {
-      newErrors.standort = 'Standort ist erforderlich';
-    }
-    
-    if (!formData.baubeginn) {
-      newErrors.baubeginn = 'Baubeginn ist erforderlich';
-    }
-    
-    if (!formData.inbetriebnahme) {
-      newErrors.inbetriebnahme = 'Inbetriebnahme ist erforderlich';
-    }
-
-    // Date validation
+    // Date validation nur wenn beide Daten vorhanden sind
     if (formData.baubeginn && formData.inbetriebnahme) {
       if (formData.baubeginn >= formData.inbetriebnahme) {
         newErrors.inbetriebnahme = 'Inbetriebnahme muss nach Baubeginn liegen';
       }
     }
 
-    // Financial validation
-    if (!isPositive(formData.gewinnProAnnum)) {
+    // Financial validation nur wenn Werte eingegeben wurden
+    if (formData.gewinnProAnnum && !isPositive(formData.gewinnProAnnum)) {
       newErrors.gewinnProAnnum = 'Gewinn p.a. muss positiv sein';
     }
     
-    if (!isPositive(formData.investitionsvolumen)) {
+    if (formData.investitionsvolumen && !isPositive(formData.investitionsvolumen)) {
       newErrors.investitionsvolumen = 'Investitionsvolumen muss positiv sein';
     }
     
-    if (!isValidPercentage(formData.ekQuote)) {
+    if (formData.ekQuote && !isValidPercentage(formData.ekQuote)) {
       newErrors.ekQuote = 'EK-Quote muss zwischen 0 und 100% liegen';
     }
     
-    if (formData.fkZins < 0) {
+    if (formData.fkZins && formData.fkZins < 0) {
       newErrors.fkZins = 'FK-Zins darf nicht negativ sein';
     }
     
-    if (formData.roi < 0) {
+    if (formData.roi && formData.roi < 0) {
       newErrors.roi = 'RoI darf nicht negativ sein';
     }
 
-    // Anlagen validation
+    // Anlagen validation nur wenn Hersteller oder Modell angegeben wurden
     anlagen.forEach((anlage, index) => {
-      if (!isNotEmpty(anlage.hersteller)) {
+      if (anlage.hersteller && !isNotEmpty(anlage.hersteller)) {
         newErrors[`anlage_${index}_hersteller`] = 'Hersteller ist erforderlich';
       }
       
-      if (!isNotEmpty(anlage.modell)) {
+      if (anlage.modell && !isNotEmpty(anlage.modell)) {
         newErrors[`anlage_${index}_modell`] = 'Modell ist erforderlich';
       }
       
-      if (!isPositive(anlage.anzahl)) {
+      if (anlage.anzahl && !isPositive(anlage.anzahl)) {
         newErrors[`anlage_${index}_anzahl`] = 'Anzahl muss positiv sein';
       }
     });
@@ -199,44 +187,71 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
   /**
    * Handles form submission
    */
-  const handleSave = () => {
-    setShowValidation(true);
-    
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    const newWindpark: Windpark = {
-      id: Date.now().toString(),
-      name: formData.name,
-      standort: formData.standort,
-      baubeginn: formData.baubeginn!,
-      inbetriebnahme: formData.inbetriebnahme!,
-      anlagen: anlagen,
-      status: formData.status,
-      gewinnProAnnum: formData.gewinnProAnnum,
-      investitionsvolumen: formData.investitionsvolumen,
-      ekQuote: formData.ekQuote,
-      fkZins: formData.fkZins,
-      roi: formData.roi
-    };
+    try {
+      // Bereite die Daten für den API-Request vor
+      const projectData = {
+        name: formData.name,
+        standort: formData.standort || null,
+        baubeginn: formData.baubeginn || null,
+        inbetriebnahme: formData.inbetriebnahme || null,
+        status: formData.status,
+        gewinnProAnnum: formData.gewinnProAnnum || null,
+        investitionsvolumen: formData.investitionsvolumen || null,
+        ekQuote: formData.ekQuote || null,
+        fkZins: formData.fkZins || null,
+        roi: formData.roi || null,
+        anlagen: anlagen
+          .filter(anlage => anlage.hersteller) // Nur Anlagen mit Hersteller
+          .map(anlage => ({
+            hersteller: anlage.hersteller,
+            modell: anlage.modell,
+            anzahl: anlage.anzahl
+          }))
+      };
 
-    onSave(newWindpark);
+      const url = 'http://localhost:8000/api/v1/projects';
+      console.log('Sende POST-Request an:', url);
+      console.log('Sende POST-Request an /projects mit Daten:', projectData);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Fehler beim POST-Request:', errorData);
+        throw new Error(errorData.detail || 'Fehler beim Speichern des Projekts');
+      }
+
+      const savedProject = await response.json();
+      console.log('Erfolgreiche Response vom POST-Request:', savedProject);
+      onSave(savedProject);
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      // Hier könnten wir einen Fehler-State setzen und dem Benutzer eine Meldung anzeigen
+    }
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
       <Container maxWidth="lg">
-        <Paper elevation={3} sx={{ p: 4 }}>
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-              Neues Windprojekt Anlegen
-            </Typography>
-            <Typography variant="body1" color="textSecondary">
-              Erfassen Sie alle relevanten Daten für Ihr neues Windenergie-Projekt
+            <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+              Neues Windpark-Projekt Anlegen
             </Typography>
           </Box>
+        <Paper elevation={3} sx={{ p: 4 }}>
+
 
           {/* Validation Alert */}
           {showValidation && Object.keys(errors).length > 0 && (
@@ -246,90 +261,65 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
           )}
 
           {/* Windpark Information */}
-          <Card sx={{ mb: 4 }}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                Projekt-Informationen
-              </Typography>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Projektname"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    error={!!errors.name}
-                    helperText={errors.name}
-                    required
-                    placeholder="z.B. Windpark Nordsee Alpha"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Standort"
-                    value={formData.standort}
-                    onChange={(e) => handleInputChange('standort', e.target.value)}
-                    error={!!errors.standort}
-                    helperText={errors.standort}
-                    required
-                    placeholder="z.B. Husum, Schleswig-Holstein"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <DatePicker
-                    label="Baubeginn"
-                    value={formData.baubeginn}
-                    onChange={(date) => handleInputChange('baubeginn', date)}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!errors.baubeginn,
-                        helperText: errors.baubeginn,
-                        required: true
-                      }
-                    }}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <DatePicker
-                    label="Inbetriebnahme"
-                    value={formData.inbetriebnahme}
-                    onChange={(date) => handleInputChange('inbetriebnahme', date)}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!errors.inbetriebnahme,
-                        helperText: errors.inbetriebnahme,
-                        required: true
-                      }
-                    }}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <FormControl fullWidth>
-                    <InputLabel>Projektstatus</InputLabel>
-                    <Select
-                      value={formData.status}
-                      label="Projektstatus"
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                    >
-                      {statusOptionen.map(status => (
-                        <MenuItem key={status} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+            Projekt-Informationen
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Projektname"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                error={!!errors.name}
+                helperText={errors.name}
+                required
+                placeholder="z.B. Windpark Nordsee Alpha"
+              />
+              <Box sx={{ mt: 3 }}>
+                <DatePicker
+                  label="Baubeginn"
+                  value={formData.baubeginn}
+                  onChange={(date) => handleInputChange('baubeginn', date)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.baubeginn,
+                      helperText: errors.baubeginn,
+                      placeholder: 'z.B. 01.01.2024'
+                    }
+                  }}
+                />
+              </Box>
+              <Box sx={{ mt: 3 }}>
+                <DatePicker
+                  label="Inbetriebnahme"
+                  value={formData.inbetriebnahme}
+                  onChange={(date) => handleInputChange('inbetriebnahme', date)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.inbetriebnahme,
+                      helperText: errors.inbetriebnahme,
+                      placeholder: 'z.B. 01.01.2025'
+                    }
+                  }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Standort"
+                value={formData.standort}
+                onChange={(e) => handleInputChange('standort', e.target.value)}
+                error={!!errors.standort}
+                helperText={errors.standort}
+                placeholder="z.B. Husum, Schleswig-Holstein"
+              />
+            </Grid>
+          </Grid>
 
           {/* Financial Information */}
           <Card sx={{ mb: 4 }}>
@@ -352,8 +342,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                     value={formData.gewinnProAnnum || ''}
                     onChange={(e) => handleInputChange('gewinnProAnnum', parseInt(e.target.value) || 0)}
                     error={!!errors.gewinnProAnnum}
-                    helperText={errors.gewinnProAnnum || 'Prognostizierter jährlicher Gewinn'}
-                    required
+                    helperText={errors.gewinnProAnnum}
                     inputProps={{ min: 0 }}
                   />
                 </Grid>
@@ -366,8 +355,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                     value={formData.investitionsvolumen || ''}
                     onChange={(e) => handleInputChange('investitionsvolumen', parseInt(e.target.value) || 0)}
                     error={!!errors.investitionsvolumen}
-                    helperText={errors.investitionsvolumen || 'Gesamtes Investitionsvolumen'}
-                    required
+                    helperText={errors.investitionsvolumen}
                     inputProps={{ min: 0 }}
                   />
                 </Grid>
@@ -380,8 +368,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                     value={formData.ekQuote || ''}
                     onChange={(e) => handleInputChange('ekQuote', parseFloat(e.target.value) || 0)}
                     error={!!errors.ekQuote}
-                    helperText={errors.ekQuote || 'Eigenkapitalquote (0-100%)'}
-                    required
+                    helperText={errors.ekQuote}
                     inputProps={{ min: 0, max: 100, step: 0.1 }}
                   />
                 </Grid>
@@ -394,8 +381,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                     value={formData.fkZins || ''}
                     onChange={(e) => handleInputChange('fkZins', parseFloat(e.target.value) || 0)}
                     error={!!errors.fkZins}
-                    helperText={errors.fkZins || 'Fremdkapitalzinssatz'}
-                    required
+                    helperText={errors.fkZins}
                     inputProps={{ min: 0, step: 0.1 }}
                   />
                 </Grid>
@@ -408,8 +394,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                     value={formData.roi || ''}
                     onChange={(e) => handleInputChange('roi', parseFloat(e.target.value) || 0)}
                     error={!!errors.roi}
-                    helperText={errors.roi || 'Return on Investment'}
-                    required
+                    helperText={errors.roi}
                     inputProps={{ min: 0, step: 0.1 }}
                   />
                 </Grid>
