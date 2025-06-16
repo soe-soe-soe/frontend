@@ -38,8 +38,13 @@ const App: React.FC = () => {
     setLoading(true);
     try {
       // API aufrufen
-      const data = await apiService.getWindparks();
+      const data = await apiService.getProjects();
       setApiData(data);
+      
+      // Windparks aus den API-Daten aktualisieren
+      if (data && Array.isArray(data)) {
+        setWindparks(data);
+      }
       
       // Zusätzliche Ausgabe im Log
       console.debug('Daten erfolgreich geladen:', data);

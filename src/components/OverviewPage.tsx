@@ -32,8 +32,8 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.getWindparks();
-      console.log('apiWindparks1a:', apiService.getWindparks());
+      const response = await apiService.getProjects();
+      console.log('apiWindparks1a:', apiService.getProjects());
       console.log('apiWindparks1b:', response);
       setApiWindparks(response);
     } catch (err) {
