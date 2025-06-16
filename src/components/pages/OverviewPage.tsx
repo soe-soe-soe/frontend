@@ -13,11 +13,11 @@ import {
   Assessment as AssessmentIcon,
   AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
-import { OverviewPageProps, Windpark } from '../types';
-import { formatCurrency, formatPercentage } from '../utils/formatters';
-import KPICard from './KPICard';
-import ProjectTable from './ProjectTable';
-import { apiService } from '../services/api';
+import { OverviewPageProps, Windpark } from '../../types';
+import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import KPICard from '../common/KPICard';
+import ProjectTable from '../common/ProjectTable';
+import { apiService } from '../../services/api';
 
 /**
  * Overview Page Component

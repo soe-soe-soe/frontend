@@ -6,7 +6,7 @@ import {
   Box,
   useTheme
 } from '@mui/material';
-import { KPICardProps } from '../types';
+import { KPICardProps } from '../../types';
 
 /**
  * KPI Card Component

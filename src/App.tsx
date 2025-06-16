@@ -15,8 +15,8 @@ import {
 
 import { Windpark, KPIData, PageType } from './types';
 import { initialWindparks } from './data/testData';
-import OverviewPage from './components/OverviewPage';
-import NewProjectPage from './components/NewProjectPage';
+import OverviewPage from './components/pages/OverviewPage';
+import NewProjectPage from './components/pages/NewProjectPage';
 import { apiService } from './services/api';
 
 /**

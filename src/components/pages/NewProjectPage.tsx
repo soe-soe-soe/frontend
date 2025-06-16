@@ -30,9 +30,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { de } from 'date-fns/locale';
 
-import { NewProjectPageProps, Anlage, Windpark, NewProjectFormData, ValidationErrors } from '../types';
-import { herstellerModelle, statusOptionen } from '../data/testData';
-import { isNotEmpty, isPositive, isValidPercentage } from '../utils/formatters';
+import { NewProjectPageProps, Anlage, Windpark, NewProjectFormData, ValidationErrors } from '../../types';
+import { herstellerModelle, statusOptionen } from '../../data/testData';
+import { isNotEmpty, isPositive, isValidPercentage } from '../../utils/formatters';
 
 /**
  * New Project Page Component

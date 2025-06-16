@@ -17,13 +17,13 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { ProjectTableProps } from '../types';
+import { ProjectTableProps } from '../../types';
 import {
   formatCurrency,
   formatPercentage,
   getStatusChipProps,
   calculateTotalAnlagen
-} from '../utils/formatters';
+} from '../../utils/formatters';
 
 /**
  * Project Table Component
