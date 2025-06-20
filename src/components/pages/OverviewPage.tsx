@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Grid,
   Button,
@@ -13,57 +13,29 @@ import {
   Assessment as AssessmentIcon,
   AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
-import { OverviewPageProps, Windpark } from '../../types';
+import { OverviewPageProps } from '../../types';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import { primaryActionButtonSx } from '../../styles/buttonStyles';
 import KPICard from '../common/KPICard';
 import ProjectTable from '../common/ProjectTable';
-import { apiService } from '../../services/api';
+import LoadingState from '../common/LoadingState';
+import ErrorState from '../common/ErrorState';
+import { useWindparks } from '../../services/hooks';
 
 /**
  * Overview Page Component
  * Hauptseite mit KPI-Dashboard und Projekttabelle
  */
 const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewProject, handleApiCall }) => {
-  const [apiWindparks, setApiWindparks] = useState<Windpark[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadWindparks = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await apiService.getProjects();
-      setApiWindparks(response);
-    } catch (err) {
-      setError('Fehler beim Laden der Windparkprojekte');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadWindparks();
-  }, []);
-  
-  const windparks = (apiWindparks?.length ?? 0) > 0 ? apiWindparks : testWindparks;
+  const { windparks, loading, error, refreshWindparks, hasApiData } = useWindparks(testWindparks);
 
   return (
     <Container maxWidth="xl">
 
 
       {/* Loading/Error States */}
-      {loading && (
-        <Box sx={{ mb: 2, textAlign: 'center' }}>
-          <Typography>Lade Windparkprojekte...</Typography>
-        </Box>
-      )}
-
-      {error && (
-        <Box sx={{ mb: 2, p: 2, backgroundColor: 'error.light', borderRadius: 1 }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      )}
+      {loading && <LoadingState message="Lade Windparkprojekte..." />}
+      {error && <ErrorState error={error} />}
 
       {/* KPI Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -132,21 +104,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
             size="large"
             startIcon={<AddIcon />}
             onClick={onNewProject}
-            sx={{
-              px: 4,
-              py: 2,
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              borderRadius: 2,
-              background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-              boxShadow: '0 4px 20px rgba(25, 118, 210, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #1565c0, #1976d2)',
-                boxShadow: '0 6px 25px rgba(25, 118, 210, 0.4)',
-                transform: 'translateY(-2px)',
-              },
-              transition: 'all 0.3s ease',
-            }}
+            sx={primaryActionButtonSx}
           >
             Neues Projekt Anlegen
           </Button>

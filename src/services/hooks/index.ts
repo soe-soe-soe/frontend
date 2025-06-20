@@ -1,0 +1,1 @@
+export { useWindparks } from './useWindparks'; 
