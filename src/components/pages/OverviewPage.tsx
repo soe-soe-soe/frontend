@@ -33,8 +33,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
     setError(null);
     try {
       const response = await apiService.getProjects();
-      console.log('apiWindparks1a:', apiService.getProjects());
-      console.log('apiWindparks1b:', response);
       setApiWindparks(response);
     } catch (err) {
       setError('Fehler beim Laden der Windparkprojekte');
@@ -48,10 +46,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
     loadWindparks();
   }, []);
   
-  console.log('apiWindparks2:', apiWindparks);
-  console.log('testWindparks:', testWindparks);
   const windparks = (apiWindparks?.length ?? 0) > 0 ? apiWindparks : testWindparks;
-  console.log('final windparks:', windparks);
 
   return (
     <Container maxWidth="xl">

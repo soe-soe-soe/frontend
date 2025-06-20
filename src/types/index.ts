@@ -71,12 +71,7 @@ export interface NewProjectFormData {
   standort: string;
   baubeginn: Date | null;
   inbetriebnahme: Date | null;
-  status: ProjectStatus;
-  gewinnProAnnum: number;
-  investitionsvolumen: number;
-  ekQuote: number;
-  fkZins: number;
-  roi: number;
+  status: string;
 }
 
 // Validierungsfehler

@@ -150,24 +150,28 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ windparks }) => {
                 <TableCell align="center">
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                     <Tooltip title="Bearbeiten">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        disabled
-                        sx={{ opacity: 0.5 }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          disabled
+                          sx={{ opacity: 0.5 }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                     <Tooltip title="Löschen">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        disabled
-                        sx={{ opacity: 0.5 }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled
+                          sx={{ opacity: 0.5 }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </Box>
                 </TableCell>
