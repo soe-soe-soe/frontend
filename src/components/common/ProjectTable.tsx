@@ -8,7 +8,6 @@ import {
   TableRow,
   Typography,
   Box,
-  Chip,
   IconButton,
   Tooltip,
   useTheme
@@ -17,20 +16,26 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { ProjectTableProps } from '../../types';
+import { ProjectTableProps, Windpark } from '../../types';
 import {
   formatCurrency,
   formatPercentage,
-  getStatusChipProps,
   calculateTotalAnlagen
 } from '../../utils/formatters';
+import StatusChip from './StatusChip';
 
 /**
  * Project Table Component
  * Zeigt alle Windpark-Projekte in einer responsiven Tabelle an
  */
-const ProjectTable: React.FC<ProjectTableProps> = ({ windparks }) => {
+const ProjectTable: React.FC<ProjectTableProps> = ({ windparks, onProjectSelect }) => {
   const theme = useTheme();
+
+  const handleRowClick = (windpark: Windpark) => {
+    if (onProjectSelect) {
+      onProjectSelect(windpark);
+    }
+  };
 
   // Desktop Table Layout
   return (
@@ -88,14 +93,15 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ windparks }) => {
         <TableBody>
           {windparks.map((windpark) => {
             const gesamtAnlagen = calculateTotalAnlagen(windpark.anlagen);
-            const chipProps = getStatusChipProps(windpark.status);
             return (
               <TableRow
                 key={windpark.id}
                 hover
+                onClick={() => handleRowClick(windpark)}
                 sx={{
                   '&:hover': {
                     backgroundColor: theme.palette.action.hover,
+                    cursor: 'pointer',
                   },
                 }}
               >
@@ -110,12 +116,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ windparks }) => {
                   </Box>
                 </TableCell>
                 <TableCell>
-                <Chip
-                  label={windpark.status}
-                  size="small"
-                  variant="filled"
-                  {...chipProps}
-                />
+                  <StatusChip status={windpark.status} />
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2" fontWeight="medium">

@@ -15,7 +15,7 @@ import {
 } from '@mui/icons-material';
 import { OverviewPageProps } from '../../types';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
-import { primaryActionButtonSx } from '../../styles/buttonStyles';
+import { primaryActionButton } from '../../styles/buttonStyles';
 import KPICard from '../common/KPICard';
 import ProjectTable from '../common/ProjectTable';
 import LoadingState from '../common/LoadingState';
@@ -26,12 +26,11 @@ import { useWindparks } from '../../services/hooks';
  * Overview Page Component
  * Hauptseite mit KPI-Dashboard und Projekttabelle
  */
-const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewProject, handleApiCall }) => {
+const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewProject, onProjectSelect, handleApiCall }) => {
   const { windparks, loading, error, refreshWindparks, hasApiData } = useWindparks(testWindparks);
 
   return (
     <Container maxWidth="xl">
-
 
       {/* Loading/Error States */}
       {loading && <LoadingState message="Lade Windparkprojekte..." />}
@@ -87,14 +86,14 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
 
         {/* Projects Table */}
         <Box sx={{ mb: 4 }}>
-          <ProjectTable windparks={windparks} />
+          <ProjectTable windparks={windparks} onProjectSelect={onProjectSelect} />
         </Box>
 
         {/* Action Buttons */}
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'left',
+            justifyContent: 'right',
             mt: 4,
             mb: 2,
           }}
@@ -104,7 +103,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
             size="large"
             startIcon={<AddIcon />}
             onClick={onNewProject}
-            sx={primaryActionButtonSx}
+            sx={primaryActionButton}
           >
             Neues Projekt Anlegen
           </Button>

@@ -68,6 +68,30 @@ export const formatDateLong = (date: Date): string => {
 };
 
 /**
+ * Formatiert einen Energiewert in kWh ohne Nachkommastellen mit deutscher Lokalisierung
+ * @param value Energiewert in kWh (kann Dezimalstellen haben)
+ * @returns Formatierter String ohne Nachkommastellen (z.B. "1.234.567 kWh")
+ */
+export const formatEnergyKWh = (value: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(Math.round(value)) + ' kWh';
+};
+
+/**
+ * Formatiert eine Dezimalzahl ohne Nachkommastellen mit deutscher Lokalisierung
+ * @param value Numerischer Wert (kann Dezimalstellen haben)
+ * @returns Formatierter String ohne Nachkommastellen (z.B. "1.234.567")
+ */
+export const formatNumberWithoutDecimals = (value: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(Math.round(value));
+};
+
+/**
  * Formatiert eine Anzahl mit Tausendertrennzeichen
  * @param value Numerischer Wert
  * @returns Formatierter String (z.B. "1.234")
@@ -198,4 +222,24 @@ export const isPositive = (value: number): boolean => {
  */
 export const isValidPercentage = (value: number): boolean => {
   return value >= 0 && value <= 100;
+};
+
+/**
+ * Konvertiert ein Datum sicher für HTML date input Felder
+ * @param date Datum als Date-Objekt oder String
+ * @returns Formatierter String im YYYY-MM-DD Format oder leerer String
+ */
+export const formatDateForInput = (date: Date | string | null): string => {
+  if (!date) return '';
+  
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (dateObj instanceof Date && !isNaN(dateObj.getTime())) {
+      return dateObj.toISOString().split('T')[0];
+    }
+  } catch (error) {
+    console.warn('Fehler beim Formatieren des Datums:', error);
+  }
+  
+  return '';
 };

@@ -9,7 +9,6 @@ import {
   Snackbar
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
   WindPower as WindPowerIcon
 } from '@mui/icons-material';
 
@@ -17,6 +16,11 @@ import { Windpark, KPIData, PageType } from './types';
 import { initialWindparks } from './data/testData';
 import OverviewPage from './components/pages/OverviewPage';
 import NewProjectPage from './components/pages/NewProjectPage';
+import ProjectDetailPage from './components/pages/ProjectDetailPage';
+import ProjectIncome from './components/pages/ProjectIncome';
+import ProjectTariffs from './components/pages/ProjectTariffs';
+import ProjectProfitAndLoss from './components/pages/ProjectProfitAndLoss';
+import ProjectInvestment from './components/pages/ProjectInvestment';
 import { apiService } from './services/api';
 
 /**
@@ -27,6 +31,7 @@ const App: React.FC = () => {
   // State Management
   const [windparks, setWindparks] = useState<Windpark[]>(initialWindparks);
   const [currentPage, setCurrentPage] = useState<PageType>('overview');
+  const [currentProject, setCurrentProject] = useState<Windpark | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -81,11 +86,12 @@ const App: React.FC = () => {
   }, [windparks]);
 
   /**
-   * Fügt ein neues Windpark-Projekt hinzu
+   * Fügt ein neues Windpark-Projekt hinzu und navigiert zur Detailseite
    */
   const handleNewProject = (newWindpark: Windpark) => {
     setWindparks(prev => [...prev, newWindpark]);
-    setCurrentPage('overview');
+    setCurrentProject(newWindpark);
+    setCurrentPage('project-detail');
     setSuccessMessage(`Projekt "${newWindpark.name}" wurde erfolgreich angelegt!`);
     setShowSuccessAlert(true);
   };
@@ -102,6 +108,46 @@ const App: React.FC = () => {
    */
   const handleBackToOverview = () => {
     setCurrentPage('overview');
+  };
+
+  /**
+   * Navigiert zurück zur Projekt-Detailseite
+   */
+  const handleBackToProjectDetail = () => {
+    setCurrentPage('project-detail');
+  };
+
+  /**
+   * Navigiert zu einer spezifischen Tab-Seite
+   */
+  const handleTabNavigation = (tabIndex: number) => {
+    switch (tabIndex) {
+      case 0: // Windpark
+        setCurrentPage('project-detail');
+        break;
+      case 1: // Erträge
+        setCurrentPage('project-income');
+        break;
+      case 2: // EEG-Tarif
+        setCurrentPage('project-tariffs');
+        break;
+      case 3: // GuV
+        setCurrentPage('project-profit-loss');
+        break;
+      case 4: // Investition
+        setCurrentPage('project-investment');
+        break;
+      default:
+        setCurrentPage('project-detail');
+    }
+  };
+
+  /**
+   * Öffnet die Detailseite für ein ausgewähltes Projekt
+   */
+  const handleProjectSelect = (windpark: Windpark) => {
+    setCurrentProject(windpark);
+    setCurrentPage('project-detail');
   };
 
   /**
@@ -127,19 +173,6 @@ const App: React.FC = () => {
         }}
       >
         <Toolbar>
-          {/* Back Button für New Project Page */}
-          {currentPage === 'new-project' && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleBackToOverview}
-              sx={{ mr: 2 }}
-              aria-label="Zurück zur Übersicht"
-            >
-              <ArrowBackIcon />
-            </IconButton>
-          )}
-          
           {/* App Icon */}
           <WindPowerIcon sx={{ mr: 2 }} />
           
@@ -154,11 +187,6 @@ const App: React.FC = () => {
           >
             Windprojekt Kalkulator
           </Typography>
-
-          {/* Page Indicator */}
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            {currentPage === 'overview' ? 'Projektübersicht' : 'Neues Projekt'}
-          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -169,14 +197,60 @@ const App: React.FC = () => {
             testWindparks={windparks}
             kpis={kpis}
             onNewProject={handleGoToNewProject}
+            onProjectSelect={handleProjectSelect}
             handleApiCall={handleApiCall}
           />
-        ) : (
+        ) : currentPage === 'new-project' ? (
           <NewProjectPage
             onSave={handleNewProject}
             onCancel={handleBackToOverview}
           />
-        )}
+        ) : currentPage === 'project-detail' ? (
+          currentProject && (
+            <ProjectDetailPage
+              project={currentProject}
+              onBack={handleBackToOverview}
+              onTabChange={handleTabNavigation}
+              currentTab={0}
+            />
+          )
+        ) : currentPage === 'project-income' ? (
+          currentProject && (
+            <ProjectIncome
+              project={currentProject}
+              onBack={handleBackToProjectDetail}
+              onTabChange={handleTabNavigation}
+              currentTab={1}
+            />
+          )
+        ) : currentPage === 'project-tariffs' ? (
+          currentProject && (
+            <ProjectTariffs
+              project={currentProject}
+              onBack={handleBackToProjectDetail}
+              onTabChange={handleTabNavigation}
+              currentTab={2}
+            />
+          )
+        ) : currentPage === 'project-profit-loss' ? (
+          currentProject && (
+            <ProjectProfitAndLoss
+              project={currentProject}
+              onBack={handleBackToProjectDetail}
+              onTabChange={handleTabNavigation}
+              currentTab={3}
+            />
+          )
+        ) : currentPage === 'project-investment' ? (
+          currentProject && (
+            <ProjectInvestment
+              project={currentProject}
+              onBack={handleBackToProjectDetail}
+              onTabChange={handleTabNavigation}
+              currentTab={4}
+            />
+          )
+        ) : null}
       </Box>
 
       {/* Success Notification */}

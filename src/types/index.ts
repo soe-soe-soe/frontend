@@ -80,19 +80,27 @@ export interface ValidationErrors {
 }
 
 // Seiten-Navigation
-export type PageType = 'overview' | 'new-project';
+export type PageType = 'overview' | 'new-project' | 'project-detail' | 'project-income' | 'project-tariffs' | 'project-profit-loss' | 'project-investment';
 
 // Props für Komponenten
 export interface OverviewPageProps {
   testWindparks: Windpark[];
   kpis: KPIData;
   onNewProject: () => void;
+  onProjectSelect?: (windpark: Windpark) => void;
   handleApiCall: () => Promise<WindparkListe>;
 }
 
 export interface NewProjectPageProps {
   onSave: (windpark: Windpark) => void;
   onCancel: () => void;
+}
+
+export interface ProjectDetailPageProps {
+  project: Windpark;
+  onBack?: () => void;
+  onTabChange?: (tabIndex: number) => void;
+  currentTab?: number;
 }
 
 export interface KPICardProps {
@@ -103,4 +111,5 @@ export interface KPICardProps {
 
 export interface ProjectTableProps {
   windparks: Windpark[];
+  onProjectSelect?: (windpark: Windpark) => void;
 }

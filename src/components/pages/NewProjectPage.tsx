@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Paper,
   Typography,
@@ -13,10 +13,6 @@ import {
   IconButton,
   Divider,
   Container,
-  Alert,
-  Card,
-  CardContent,
-  Tooltip
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -25,208 +21,53 @@ import {
   Cancel as CancelIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { de } from 'date-fns/locale';
 
-import { NewProjectPageProps, Anlage, NewProjectFormData, ValidationErrors } from '../../types';
+
+import { NewProjectPageProps } from '../../types';
 import { herstellerModelle } from '../../data/testData';
-import { isNotEmpty, isPositive } from '../../utils/formatters';
+import { useProjectForm } from '../../services/hooks';
+import { primaryActionButton, secondaryActionButton, utilityButton } from '../../styles/buttonStyles';
+import { formatDateForInput } from '../../utils/formatters';
+import ValidationState from '../common/ValidationState';
+import ProjectHeader from '../common/ProjectHeader';
 
 /**
  * New Project Page Component
  * Formular zur Erstellung neuer Windpark-Projekte
  */
 const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => {
-  // Form State
-  const [formData, setFormData] = useState<NewProjectFormData>({
-    name: '',
-    standort: '',
-    baubeginn: null,
-    inbetriebnahme: null,
-    status: 'Entwurf'
-  });
+  const {
+    formData,
+    anlagen,
+    errors,
+    showValidation,
+    isSubmitting,
+    handleInputChange,
+    handleAnlageChange,
+    addAnlage,
+    removeAnlage,
+    submitForm
+  } = useProjectForm();
 
-  // Anlagen State
-  const [anlagen, setAnlagen] = useState<Anlage[]>([
-    { id: '1', hersteller: '', modell: '', anzahl: 1 }
-  ]);
-
-  // Validation State
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [showValidation, setShowValidation] = useState(false);
-
-  /**
-   * Handles input changes for form fields
-   */
-  const handleInputChange = (field: keyof NewProjectFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  /**
-   * Handles changes to Anlage fields
-   */
-  const handleAnlageChange = (index: number, field: keyof Anlage, value: any) => {
-    setAnlagen(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      
-      // Reset modell when hersteller changes
-      if (field === 'hersteller') {
-        updated[index].modell = '';
-      }
-      
-      return updated;
-    });
-
-    // Clear validation errors for this anlage
-    const errorKey = `anlage_${index}_${field}`;
-    if (errors[errorKey]) {
-      setErrors(prev => ({ ...prev, [errorKey]: '' }));
-    }
-  };
-
-  /**
-   * Adds a new Anlage to the form
-   */
-  const addAnlage = () => {
-    const newId = Date.now().toString();
-    setAnlagen(prev => [
-      ...prev,
-      { id: newId, hersteller: '', modell: '', anzahl: 1 }
-    ]);
-  };
-
-  /**
-   * Removes an Anlage from the form
-   */
-  const removeAnlage = (index: number) => {
-    if (anlagen.length > 1) {
-      setAnlagen(prev => prev.filter((_, i) => i !== index));
-      
-      // Remove validation errors for removed anlage
-      const updatedErrors = { ...errors };
-      Object.keys(updatedErrors).forEach(key => {
-        if (key.startsWith(`anlage_${index}_`)) {
-          delete updatedErrors[key];
-        }
-      });
-      setErrors(updatedErrors);
-    }
-  };
-
-  /**
-   * Validates the entire form
-   */
-  const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
-
-    // Nur Name ist verpflichtend
-    if (!isNotEmpty(formData.name)) {
-      newErrors.name = 'Projektname ist erforderlich';
-    }
-    
-    // Date validation nur wenn beide Daten vorhanden sind
-    if (formData.baubeginn && formData.inbetriebnahme) {
-      if (formData.baubeginn >= formData.inbetriebnahme) {
-        newErrors.inbetriebnahme = 'Inbetriebnahme muss nach Baubeginn liegen';
-      }
-    }
-
-    // Anlagen validation nur wenn Hersteller oder Modell angegeben wurden
-    anlagen.forEach((anlage, index) => {
-      if (anlage.hersteller && !isNotEmpty(anlage.hersteller)) {
-        newErrors[`anlage_${index}_hersteller`] = 'Hersteller ist erforderlich';
-      }
-      
-      if (anlage.modell && !isNotEmpty(anlage.modell)) {
-        newErrors[`anlage_${index}_modell`] = 'Modell ist erforderlich';
-      }
-      
-      if (anlage.anzahl && !isPositive(anlage.anzahl)) {
-        newErrors[`anlage_${index}_anzahl`] = 'Anzahl muss positiv sein';
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  /**
-   * Handles form submission
-   */
   const handleSave = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      // Bereite die Daten für den API-Request vor
-      const projectData = {
-        name: formData.name,
-        standort: formData.standort || null,
-        baubeginn: formData.baubeginn || null,
-        inbetriebnahme: formData.inbetriebnahme || null,
-        status: formData.status,
-        anlagen: anlagen
-          .filter(anlage => anlage.hersteller) // Nur Anlagen mit Hersteller
-          .map(anlage => ({
-            hersteller: anlage.hersteller,
-            modell: anlage.modell,
-            anzahl: anlage.anzahl
-          }))
-      };
-
-      const url = 'http://localhost:8000/api/v1/projects';
-      console.log('Sende POST-Request an:', url);
-      console.log('Sende POST-Request an /projects mit Daten:', projectData);
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(projectData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Fehler beim POST-Request:', errorData);
-        throw new Error(errorData.detail || 'Fehler beim Speichern des Projekts');
-      }
-
-      const savedProject = await response.json();
-      console.log('Erfolgreiche Response vom POST-Request:', savedProject);
-      onSave(savedProject);
-    } catch (error) {
-      console.error('Fehler beim Speichern:', error);
-      // Hier könnten wir einen Fehler-State setzen und dem Benutzer eine Meldung anzeigen
-    }
+    const success = await submitForm(onSave);
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
-      <Container maxWidth="lg">
-          {/* Header */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-              Neues Windpark-Projekt Anlegen
-            </Typography>
-          </Box>
-        <Paper elevation={3} sx={{ p: 4 }}>
+    <Container maxWidth="lg">
 
-          {/* Validation Alert */}
-          {showValidation && Object.keys(errors).length > 0 && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              Bitte korrigieren Sie die markierten Felder bevor Sie fortfahren.
-            </Alert>
-          )}
+        {/* Validation State */}
+        <ValidationState errors={errors} showValidation={showValidation} />
+
+        {/* Header */}
+        <ProjectHeader 
+          name="Neues Windpark-Projekt anlegen" 
+          onBack={onCancel}
+          showBackButton={true}
+        />
+
+          {/* Form */}
+          <Paper elevation={3} sx={{ p: 4 }}>
 
           {/* Windpark Information */}
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
@@ -245,33 +86,27 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
                 placeholder="z.B. Windpark Nordsee Alpha"
               />
               <Box sx={{ mt: 3 }}>
-                <DatePicker
+                <TextField
+                  fullWidth
                   label="Baubeginn"
-                  value={formData.baubeginn}
-                  onChange={(date) => handleInputChange('baubeginn', date)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.baubeginn,
-                      helperText: errors.baubeginn,
-                      placeholder: 'z.B. 01.01.2024'
-                    }
-                  }}
+                  type="date"
+                  value={formatDateForInput(formData.baubeginn)}
+                  onChange={(e) => handleInputChange('baubeginn', e.target.value ? new Date(e.target.value) : null)}
+                  error={!!errors.baubeginn}
+                  helperText={errors.baubeginn}
+                  InputLabelProps={{ shrink: true }}
                 />
               </Box>
               <Box sx={{ mt: 3 }}>
-                <DatePicker
+                <TextField
+                  fullWidth
                   label="Inbetriebnahme"
-                  value={formData.inbetriebnahme}
-                  onChange={(date) => handleInputChange('inbetriebnahme', date)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.inbetriebnahme,
-                      helperText: errors.inbetriebnahme,
-                      placeholder: 'z.B. 01.01.2025'
-                    }
-                  }}
+                  type="date"
+                  value={formatDateForInput(formData.inbetriebnahme)}
+                  onChange={(e) => handleInputChange('inbetriebnahme', e.target.value ? new Date(e.target.value) : null)}
+                  error={!!errors.inbetriebnahme}
+                  helperText={errors.inbetriebnahme}
+                  InputLabelProps={{ shrink: true }}
                 />
               </Box>
             </Grid>
@@ -299,6 +134,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
               startIcon={<AddIcon />}
               onClick={addAnlage}
               size="small"
+              sx={utilityButton}
             >
               Anlage hinzufügen
             </Button>
@@ -405,7 +241,7 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
               startIcon={<CancelIcon />}
               onClick={onCancel}
               size="large"
-              sx={{ px: 4 }}
+              sx={secondaryActionButton}
             >
               Abbrechen
             </Button>
@@ -414,20 +250,15 @@ const NewProjectPage: React.FC<NewProjectPageProps> = ({ onSave, onCancel }) => 
               startIcon={<SaveIcon />}
               onClick={handleSave}
               size="large"
-              sx={{
-                px: 4,
-                background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #1565c0, #1976d2)',
-                },
-              }}
+              sx={primaryActionButton}
+              disabled={isSubmitting}
             >
-              Projekt Speichern
+              {isSubmitting ? 'Speichere...' : 'Projekt Speichern'}
             </Button>
           </Box>
+          
         </Paper>
       </Container>
-    </LocalizationProvider>
   );
 };
 
