@@ -163,7 +163,8 @@ const App: React.FC = () => {
 
   return (
     <Box sx={{ 
-      flexGrow: 1, 
+      display: 'flex',
+      flexDirection: 'column',
       minHeight: '100vh',
       backgroundColor: '#F8FAFC'
     }}>
@@ -195,7 +196,7 @@ const App: React.FC = () => {
       </AppBar>
 
       {/* Main Content */}
-      <Box component="main" sx={{ pt: 4, pb: 4 }}>
+      <Box component="main" sx={{ flexGrow: 1, pt: 4, pb: 4 }}>
         {currentPage === 'overview' ? (
           <OverviewPage
             testWindparks={windparks}
@@ -289,7 +290,6 @@ const App: React.FC = () => {
         sx={{
           py: 3,
           px: 2,
-          mt: 'auto',
           backgroundColor: 'grey.100',
           borderTop: '1px solid',
           borderColor: 'grey.300',

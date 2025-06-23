@@ -13,6 +13,7 @@ import { ProjectDetailPageProps } from '../../types';
 import ProjectHeader from '../common/ProjectHeader';
 import ProjectTabs from '../common/TabPanel';
 import GutachtenTable from '../common/GutachtenTable';
+import PValueChart from '../common/PValueChart';
 import { formatNumberWithoutDecimals, formatDateForInput, formatPercentage, formatEnergyKWh } from '../../utils/formatters';
 
 /**
@@ -25,8 +26,8 @@ const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTa
   const abzuege = 12.5;
   const nettoertragKWhP50 = bruttoertragKWh * (1 - abzuege / 100);
   const nettoertragKWhP75 = nettoertragKWhP50 * (95 / 100);
-  const gutachtenTyp = "Wind Pro";
-  const erstelltAm = new Date('2024-03-15');
+
+  // Gutachten-Daten
   const gutachtenListe = [
     {
       id: 1,
@@ -68,7 +69,7 @@ const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTa
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3, textTransform: 'none' }}>
             Erträge
           </Typography>
-
+          
           {/* Ertrags-Daten */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={6}>
@@ -82,16 +83,6 @@ const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTa
               />
               <TextField sx={{ mt: 3 }}
                 fullWidth
-                label="Nettoertrag (P50)"
-                value={`${formatNumberWithoutDecimals(nettoertragKWhP50)} kWh`}
-                InputProps={{
-                  readOnly: true
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
                 label="Gesamte Abzüge"
                 value={`${abzuege.toFixed(1)} %`}
                 InputProps={{
@@ -100,11 +91,38 @@ const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTa
               />
               <TextField sx={{ mt: 3 }}
                 fullWidth
-                label="Nettoertrag (P75)"
+                label="P50"
+                value={`${formatNumberWithoutDecimals(nettoertragKWhP50)} kWh`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField sx={{ mt: 3 }}
+                fullWidth
+                label="P75"
                 value={`${formatNumberWithoutDecimals(nettoertragKWhP75)} kWh`}
                 InputProps={{
                   readOnly: true
                 }}
+              />
+              <TextField sx={{ mt: 3 }}
+                fullWidth
+                label="P95"
+                value={`${formatNumberWithoutDecimals(nettoertragKWhP75 * 0.88)} kWh`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <PValueChart
+                bruttoertrag={bruttoertragKWh}
+                p50={nettoertragKWhP50}
+                p75={nettoertragKWhP75}
+                p90={nettoertragKWhP75 * 0.92} // Beispielwert P90
+                p95={nettoertragKWhP75 * 0.88} // Beispielwert P95
+                title="Probablistische Bewertung"
+                height="350px" // Höher für bessere Darstellung mit 5 Textfeldern
               />
             </Grid>
           </Grid>
