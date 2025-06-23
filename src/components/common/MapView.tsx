@@ -1,19 +1,49 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix für Leaflet Icons in React
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+interface MarkerData {
+  id: string;
+  position: [number, number]; // [lat, lng]
+  title: string;
+  description?: string;
+}
 
 interface MapViewProps {
   projectName: string;
-  coordinates?: string;
-  mapImageUrl?: string;
-  onClick?: () => void;
+  coordinates: [number, number]; // [lat, lng]
+  height?: string;
+  markers?: MarkerData[];
+  zoom?: number;
 }
 
 const MapView: React.FC<MapViewProps> = ({ 
   projectName, 
-  coordinates = "54.4°N 9.0°E",
-  mapImageUrl = "/map-background.jpg",
-  onClick 
+  coordinates,
+  height = '217px',
+  markers = [],
+  zoom = 12
 }) => {
+  // Wenn keine Marker übergeben werden, erstelle einen Standard-Marker
+  const defaultMarkers: MarkerData[] = markers.length > 0 ? markers : [
+    {
+      id: 'main',
+      position: coordinates,
+      title: projectName,
+      description: 'Windpark Standort'
+    }
+  ];
+
   return (
     <Box sx={{ mb: 3, position: 'relative' }}>
       {/* Standort Label in der Umrandung */}
@@ -27,108 +57,65 @@ const MapView: React.FC<MapViewProps> = ({
           px: 1,
           color: 'rgba(0, 0, 0, 0.6)',
           fontSize: '0.75rem',
-          zIndex: 1,
+          zIndex: 1000,
         }}
       >
         Standort
       </Typography>
       
       <Box
-        onClick={onClick}
         sx={{
           width: '100%',
-          height: '217px', // 3 TextFields (56px each) + 2 Abstände (24px each) = 168px + 16px für Label-Raum
+          height: height,
           border: '1px solid rgba(0, 0, 0, 0.23)',
           borderRadius: 1,
-          cursor: onClick ? 'pointer' : 'default',
           position: 'relative',
           overflow: 'hidden',
-          backgroundImage: `url("${mapImageUrl}")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          '&:hover': onClick ? {
+          '& .leaflet-container': {
+            height: '100%',
+            width: '100%',
+            borderRadius: '4px',
+          },
+          '&:hover': {
             borderColor: 'rgba(0, 0, 0, 0.87)',
             transition: 'border-color 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-          } : {},
+          },
           '&:focus-within': {
             borderColor: '#1976d2',
             borderWidth: '2px',
-            '& + .MuiFormLabel-root': {
-              color: '#1976d2',
-            }
           }
         }}
       >
-        {/* Windpark-Pinnadel */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '45%',
-            left: '50%',
-            transform: 'translate(-50%, -100%)',
-            zIndex: 10,
-          }}
+        <MapContainer
+          center={coordinates}
+          zoom={zoom}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          attributionControl={false}
+          scrollWheelZoom={true}
         >
-          {/* Pin */}
-          <Box
-            sx={{
-              width: '24px',
-              height: '30px',
-              backgroundColor: '#ea4335',
-              borderRadius: '50% 50% 50% 0',
-              transform: 'rotate(-45deg)',
-              border: '2px solid white',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              position: 'relative',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                top: '4px',
-                left: '4px',
-                width: '14px',
-                height: '14px',
-                backgroundColor: 'white',
-                borderRadius: '50%',
-              }
-            }}
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
-          {/* Projekt-Label */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '-45px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <Typography variant="caption" sx={{ fontWeight: 600, color: '#333' }}>
-              {projectName}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Koordinaten-Anzeige (wie bei Google Maps) */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '8px',
-            right: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            padding: '2px 6px',
-            borderRadius: '3px',
-            fontSize: '10px',
-            color: '#666',
-          }}
-        >
-          {coordinates}
-        </Box>
+          <ZoomControl position="topright" />
+          {defaultMarkers.map((marker) => (
+            <Marker key={marker.id} position={marker.position}>
+              <Popup>
+                <Box>
+                  <Typography variant="subtitle2" fontWeight="bold">
+                    {marker.title}
+                  </Typography>
+                  {marker.description && (
+                    <Typography variant="body2" color="text.secondary">
+                      {marker.description}
+                    </Typography>
+                  )}
+                </Box>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
       </Box>
     </Box>
   );

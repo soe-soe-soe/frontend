@@ -76,7 +76,10 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ project, onBack, 
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <MapView projectName={project.name} />
+              <MapView 
+                projectName={project.name} 
+                coordinates={[54.4, 9.0]} // Beispiel-Koordinaten für Nordsee/Schleswig-Holstein
+              />
             </Grid>
           </Grid>
 
