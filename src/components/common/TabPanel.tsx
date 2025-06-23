@@ -18,7 +18,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ onTabChange, currentTab = 0 }
     }
   };
 
-  const tabLabels = ['Windpark', 'Gutachten', 'Tarife', 'Kosten', 'GuV', 'Investition'];
+  const tabLabels = ['Windpark', 'Erträge', 'Tarife', 'Kosten', 'GuV', 'Investition'];
 
   return (
     <Box sx={{ pb: 0, pt: 0, px: 4 }}>
