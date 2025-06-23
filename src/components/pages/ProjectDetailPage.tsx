@@ -17,6 +17,7 @@ import { utilityButton } from '../../styles/buttonStyles';
 import { formatDateForInput } from '../../utils/formatters';
 import ProjectHeader from '../common/ProjectHeader';
 import ProjectTabs from '../common/TabPanel';
+import MapView from '../common/MapView';
 
 /**
  * Project Detail Page Component
@@ -75,13 +76,7 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ project, onBack, 
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Standort"
-                value={project.standort}
-                InputProps={{ readOnly: true }}
-                placeholder="z.B. Husum, Schleswig-Holstein"
-              />
+              <MapView projectName={project.name} />
             </Grid>
           </Grid>
 

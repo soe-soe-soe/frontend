@@ -19,6 +19,7 @@ import NewProjectPage from './components/pages/NewProjectPage';
 import ProjectDetailPage from './components/pages/ProjectDetailPage';
 import ProjectIncome from './components/pages/ProjectIncome';
 import ProjectTariffs from './components/pages/ProjectTariffs';
+import ProjectCosts from './components/pages/ProjectCosts';
 import ProjectProfitAndLoss from './components/pages/ProjectProfitAndLoss';
 import ProjectInvestment from './components/pages/ProjectInvestment';
 import { apiService } from './services/api';
@@ -125,16 +126,19 @@ const App: React.FC = () => {
       case 0: // Windpark
         setCurrentPage('project-detail');
         break;
-      case 1: // Erträge
+      case 1: // Gutachten
         setCurrentPage('project-income');
         break;
-      case 2: // EEG-Tarif
+      case 2: // Tarife
         setCurrentPage('project-tariffs');
         break;
-      case 3: // GuV
+      case 3: // Kosten
+        setCurrentPage('project-costs');
+        break;
+      case 4: // GuV
         setCurrentPage('project-profit-loss');
         break;
-      case 4: // Investition
+      case 5: // Investition
         setCurrentPage('project-investment');
         break;
       default:
@@ -232,13 +236,22 @@ const App: React.FC = () => {
               currentTab={2}
             />
           )
+        ) : currentPage === 'project-costs' ? (
+          currentProject && (
+            <ProjectCosts
+              project={currentProject}
+              onBack={handleBackToProjectDetail}
+              onTabChange={handleTabNavigation}
+              currentTab={3}
+            />
+          )
         ) : currentPage === 'project-profit-loss' ? (
           currentProject && (
             <ProjectProfitAndLoss
               project={currentProject}
               onBack={handleBackToProjectDetail}
               onTabChange={handleTabNavigation}
-              currentTab={3}
+              currentTab={4}
             />
           )
         ) : currentPage === 'project-investment' ? (
@@ -247,7 +260,7 @@ const App: React.FC = () => {
               project={currentProject}
               onBack={handleBackToProjectDetail}
               onTabChange={handleTabNavigation}
-              currentTab={4}
+              currentTab={5}
             />
           )
         ) : null}

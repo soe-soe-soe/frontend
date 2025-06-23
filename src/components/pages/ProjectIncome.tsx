@@ -6,23 +6,47 @@ import {
   TextField,
   Box,
   Container,
+  InputAdornment,
 } from '@mui/material';
 
 import { ProjectDetailPageProps } from '../../types';
 import ProjectHeader from '../common/ProjectHeader';
 import ProjectTabs from '../common/TabPanel';
+import GutachtenTable from '../common/GutachtenTable';
 import { formatNumberWithoutDecimals, formatDateForInput, formatPercentage, formatEnergyKWh } from '../../utils/formatters';
 
 /**
  * Project Income Page Component
- * Detailansicht der Erträge eines Windpark-Projekts
+ * Detailansicht des Gutachtens eines Windpark-Projekts
  */
 const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTabChange, currentTab }) => {
-  // Beispiel-Erträge
+  // Beispielwerte
   const bruttoertragKWh = 2500000; 
   const abzuege = 12.5;
   const nettoertragKWhP50 = bruttoertragKWh * (1 - abzuege / 100);
   const nettoertragKWhP75 = nettoertragKWhP50 * (95 / 100);
+  const gutachtenTyp = "Wind Pro";
+  const erstelltAm = new Date('2024-03-15');
+  const gutachtenListe = [
+    {
+      id: 1,
+      aktiv: true,
+      typ: "Wind Pro",
+      erstelltAm: new Date('2024-03-15')
+    },
+    {
+      id: 2,
+      aktiv: false,
+      typ: "WAsP",
+      erstelltAm: new Date('2024-02-10')
+    },
+    {
+      id: 3,
+      aktiv: false,
+      typ: "WindPRO",
+      erstelltAm: new Date('2024-01-20')
+    }
+  ];
 
   return (
     <Container maxWidth="xl">
@@ -42,67 +66,56 @@ const ProjectIncome: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTa
       <Paper elevation={3} sx={{ p: 4 }}>
         <Box sx={{ py: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3, textTransform: 'none' }}>
-            Gutachten
+            Erträge
           </Typography>
+
+          {/* Ertrags-Daten */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Typ"
-                  value="Wind Pro"
-                  InputProps={{ readOnly: true }}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Erstellt am"
-                  type="date"
-                  InputProps={{ readOnly: true }}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-          </Grid>
-
-          {/* Erträge-Felder */}
-          <Grid container spacing={3} sx={{ mt: 2 }}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Bruttoertrag
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {formatEnergyKWh(bruttoertragKWh)}
-              </Typography>
+              <TextField
+                fullWidth
+                label="Bruttoertrag"
+                value={`${formatNumberWithoutDecimals(bruttoertragKWh)} kWh`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField sx={{ mt: 3 }}
+                fullWidth
+                label="Nettoertrag (P50)"
+                value={`${formatNumberWithoutDecimals(nettoertragKWhP50)} kWh`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
             </Grid>
-            
             <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Abzüge
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'warning.main' }}>
-                {formatPercentage(abzuege)}
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Nettoertrag (P50)
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'green' }}>
-                {formatEnergyKWh(nettoertragKWhP50)}
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Nettoertrag (P75)
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'green'  }}>
-                {formatEnergyKWh(nettoertragKWhP75)}
-              </Typography>
+              <TextField
+                fullWidth
+                label="Gesamte Abzüge"
+                value={`${abzuege.toFixed(1)} %`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+              <TextField sx={{ mt: 3 }}
+                fullWidth
+                label="Nettoertrag (P75)"
+                value={`${formatNumberWithoutDecimals(nettoertragKWhP75)} kWh`}
+                InputProps={{
+                  readOnly: true
+                }}
+              />
             </Grid>
           </Grid>
+
+          {/* Gutachten Section */}
+          <Box sx={{ mt: 6 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3, textTransform: 'none' }}>
+              Gutachten
+            </Typography>
+            <GutachtenTable gutachten={gutachtenListe} />
+          </Box>
         </Box>
       </Paper>
     </Container>

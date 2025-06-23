@@ -243,3 +243,15 @@ export const formatDateForInput = (date: Date | string | null): string => {
   
   return '';
 };
+
+/**
+ * Formatiert einen Cent-Betrag mit zwei Nachkommastellen
+ * @param value Cent-Betrag (z.B. 5.25 für 5,25 Cent)
+ * @returns Formatierter String mit zwei Nachkommastellen (z.B. "5,25")
+ */
+export const formatCentAmount = (value: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+};

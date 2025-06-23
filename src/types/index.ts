@@ -80,7 +80,7 @@ export interface ValidationErrors {
 }
 
 // Seiten-Navigation
-export type PageType = 'overview' | 'new-project' | 'project-detail' | 'project-income' | 'project-tariffs' | 'project-profit-loss' | 'project-investment';
+export type PageType = 'overview' | 'new-project' | 'project-detail' | 'project-income' | 'project-tariffs' | 'project-costs' | 'project-profit-loss' | 'project-investment';
 
 // Props für Komponenten
 export interface OverviewPageProps {
