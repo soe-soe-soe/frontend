@@ -79,25 +79,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
           >
             Windparks
           </Typography>
-          <Typography variant="body2" color="textSecondary">
-            {windparks.length} {windparks.length === 1 ? 'Projekt' : 'Projekte'} insgesamt
-          </Typography>
-        </Box>
-
-        {/* Projects Table */}
-        <Box sx={{ mb: 4 }}>
-          <ProjectTable windparks={windparks} onProjectSelect={onProjectSelect} />
-        </Box>
-
-        {/* Action Buttons */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'right',
-            mt: 4,
-            mb: 2,
-          }}
-        >
           <Button
             variant="contained"
             size="large"
@@ -107,6 +88,25 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ testWindparks, kpis, onNewP
           >
             Neues Projekt Anlegen
           </Button>
+        </Box>
+
+        {/* Projects Table */}
+        <Box sx={{ mb: 4 }}>
+          <ProjectTable windparks={windparks} onProjectSelect={onProjectSelect} />
+        </Box>
+
+        {/* Project Count */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'right',
+            mt: 4,
+            mb: 2,
+          }}
+        >
+          <Typography variant="body2" color="textSecondary">
+            {windparks.length} {windparks.length === 1 ? 'Projekt' : 'Projekte'} insgesamt
+          </Typography>
         </Box>
       </Paper>
     </Container>

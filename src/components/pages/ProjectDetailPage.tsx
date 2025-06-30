@@ -77,8 +77,25 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ project, onBack, 
             
             <Grid item xs={12} md={6}>
               <MapView 
-                projectName={project.name} 
-                coordinates={[54.4, 9.0]} // Beispiel-Koordinaten für Nordsee/Schleswig-Holstein
+                projectName={project.name}
+                flaeche={[
+                  [52.623003, 9.572096],
+                  [52.621316, 9.543625],
+                  [52.613982, 9.551056],
+                  [52.613336, 9.550976],
+                  [52.612206, 9.554778],
+                  [52.613568, 9.554962],
+                  [52.613960, 9.560125],
+                  [52.610526, 9.559818],
+                  [52.609900, 9.569861]
+                ]} // Beispiel-Polygon für Windpark-Fläche
+                windkraftanlagen={[
+                  [52.612176, 9.565374],
+                  [52.616375, 9.560333],
+                  [52.614994, 9.552927],
+                  [52.620847, 9.566043],
+                  [52.619959, 9.553068]
+                ]} // Beispiel-Positionen für Windkraftanlagen
               />
             </Grid>
           </Grid>

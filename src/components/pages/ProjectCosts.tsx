@@ -14,6 +14,7 @@ import ProjectHeader from '../common/ProjectHeader';
 import ProjectTabs from '../common/TabPanel';
 import CostTable from '../common/CostTable';
 import CollapsibleSection from '../common/CollapsibleSection';
+import OutputFieldNumber from '../common/OutputFieldNumber';
 import { formatCurrency, formatNumberWithoutDecimals } from '../../utils/formatters';
 
 /**
@@ -37,7 +38,8 @@ const ProjectCosts: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTab
 
   // Gesamtkosten für jeden Abschnitt berechnen
   const infrastrukturKosten = 450000 + 320000 + 180000 + 0; // 950.000 €
-  const planungGenehmigungKosten = 25000 + 15000 + 35000 + 120000 + 45000 + 18000; // 258.000 €
+  const planungGenehmigungKosten = 120000 + 45000 + 18000; // 183.000 € (ohne Gutachten)
+  const gutachtenKosten = 25000 + 15000 + 35000; // 75.000 €
   const bauueberwachungKosten = 85000 + 140000 + 25000; // 250.000 €
   
   // Betriebskosten (jährlich)
@@ -46,7 +48,7 @@ const ProjectCosts: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTab
   const abgabenKosten = 3500; // 3.500 €/Jahr (ohne Kommunalabgabe, da pro kWh)
 
   // Gesamtsummen für Hauptabschnitte
-  const gesamtInvestitionskosten = gesamtkostenAnlagen + infrastrukturKosten + planungGenehmigungKosten + bauueberwachungKosten;
+  const gesamtInvestitionskosten = gesamtkostenAnlagen + infrastrukturKosten + planungGenehmigungKosten + gutachtenKosten + bauueberwachungKosten;
   const gesamtBetriebskosten = wartungKosten + versicherungKosten + abgabenKosten; // Pro Jahr
 
   return (
@@ -106,31 +108,21 @@ const ProjectCosts: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTab
               <CollapsibleSection title="Infrastruktur" totalCost={formatCurrency(infrastrukturKosten)}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <OutputFieldNumber
                       label="Zuwegung & Wegeausbau"
-                      placeholder="€/Pauschal oder €/km"
                       value="450.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Kabeltrassen & Tiefbau"
-                      placeholder="€/km oder Gesamtbetrag"
                       value="320.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Netzanschluss & Übergabestation"
                       value="180.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Umspannwerk (falls notwendig)"
                       value="0 €"
-                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>
@@ -140,33 +132,37 @@ const ProjectCosts: React.FC<ProjectDetailPageProps> = ({ project, onBack, onTab
               <CollapsibleSection title="Planung & Genehmigung" totalCost={formatCurrency(planungGenehmigungKosten)}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Gutachten (Schall, Schatten, Avifauna)"
-                      multiline
-                      rows={3}
-                      value={`Schallgutachten: 25.000 €
-Schattenwurfgutachten: 15.000 €
-Avifauna-Gutachten: 35.000 €`}
-                      InputProps={{ readOnly: true }}
-                    />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Projektentwicklungskosten"
                       value="120.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="BImSchG-Antrag & Genehmigung"
                       value="45.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Behördengebühren"
                       value="18.000 €"
-                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+                </Grid>
+              </CollapsibleSection>
+
+              {/* Gutachten */}
+              <CollapsibleSection title="Gutachten" totalCost={formatCurrency(gutachtenKosten)}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <OutputFieldNumber
+                      label="Schallgutachten"
+                      value="25.000 €"
+                    />
+                    <OutputFieldNumber
+                      label="Schattenwurfgutachten"
+                      value="15.000 €"
+                    />
+                    <OutputFieldNumber
+                      label="Avifauna-Gutachten"
+                      value="35.000 €"
                     />
                   </Grid>
                 </Grid>
@@ -176,24 +172,17 @@ Avifauna-Gutachten: 35.000 €`}
               <CollapsibleSection title="Bauüberwachung" totalCost={formatCurrency(bauueberwachungKosten)}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <OutputFieldNumber
                       label="Bauleitung"
                       value="85.000 €"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Baurisiken (Puffer)"
-                      placeholder="% oder €"
                       value="5% (140.000 €)"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Montageversicherung"
                       value="25.000 €"
-                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>
@@ -229,29 +218,21 @@ Avifauna-Gutachten: 35.000 €`}
               <CollapsibleSection title="Wartung" totalCost={formatCurrency(wartungKosten) + "/Jahr"}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <OutputFieldNumber
                       label="Wartungsvertrag (jährlich)"
                       value="45.000 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Monitoring & Betriebsführung"
                       value="18.000 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Pachtkosten"
                       value="12.000 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Kostenindexierung"
                       value="2,5 %/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>
@@ -261,18 +242,13 @@ Avifauna-Gutachten: 35.000 €`}
               <CollapsibleSection title="Versicherungen" totalCost={formatCurrency(versicherungKosten) + "/Jahr"}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <OutputFieldNumber
                       label="Versicherungen (Haftpflicht, Maschinenbruch)"
                       value="22.000 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Betriebsunterbrechungsversicherung"
-                      placeholder="Optional"
                       value="8.500 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>
@@ -282,18 +258,13 @@ Avifauna-Gutachten: 35.000 €`}
               <CollapsibleSection title="Abgaben" totalCost={formatCurrency(abgabenKosten) + "/Jahr"}>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <OutputFieldNumber
                       label="Kommunalabgabe nach EEG §6"
-                      placeholder="€/kWh oder € pauschal"
                       value="0,002 €/kWh"
-                      InputProps={{ readOnly: true }}
                     />
-                    <TextField sx={{ mt: 3 }}
-                      fullWidth
+                    <OutputFieldNumber
                       label="Sonstige laufende Gebühren"
                       value="3.500 €/Jahr"
-                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
                 </Grid>

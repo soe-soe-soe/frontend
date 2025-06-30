@@ -30,31 +30,31 @@ const PValueChart: React.FC<PValueChartProps> = ({
       id: 'P95',
       label: 'P95',
       value: p95,
-      color: theme.palette.error.main
+      color: '#FCA5A5' // Helles Rot/Rosa
     },
     {
       id: 'P90',
       label: 'P90',
       value: p90,
-      color: theme.palette.warning.main
+      color: '#FDE68A' // Helles Gelb/Orange
     },
     {
       id: 'P75',
       label: 'P75',
       value: p75,
-      color: theme.palette.success.main
+      color: '#A7F3D0' // Helles Grün
     },
     {
       id: 'P50',
       label: 'P50',
       value: p50,
-      color: theme.palette.secondary.main
+      color: '#BFDBFE' // Helles Blau
     },
     {
       id: 'Bruttoertrag',
       label: 'Bruttoertrag',
       value: bruttoertrag,
-      color: theme.palette.primary.main
+      color: '#93C5FD' // Mittleres Blau (Primary)
     }
   ];
 
@@ -108,8 +108,9 @@ const PValueChart: React.FC<PValueChartProps> = ({
           colors={(d) => d.data.color}
           borderColor={{
             from: 'color',
-            modifiers: [['darker', 1.6]]
+            modifiers: [['darker', 0.4]]
           }}
+          borderWidth={1}
           axisTop={null}
           axisRight={null}
           axisBottom={{
@@ -132,7 +133,7 @@ const PValueChart: React.FC<PValueChartProps> = ({
           }}
           labelSkipWidth={12}
           labelSkipHeight={12}
-          labelTextColor="white"
+          labelTextColor="#374151"
           // Werte am Ende der Balken anzeigen
           enableLabel={true}
           label={(d) => `${formatNumberWithoutDecimals(d.value as number)} kWh`}
@@ -140,6 +141,22 @@ const PValueChart: React.FC<PValueChartProps> = ({
           labelOffset={-80}
           animate={true}
           motionConfig="gentle"
+          tooltip={({ indexValue, value }) => (
+            <div
+              style={{
+                background: 'white',
+                padding: '9px 12px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                fontSize: '14px',
+                fontWeight: 500,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <strong>{indexValue}</strong>: {formatNumberWithoutDecimals(value as number)} kWh
+            </div>
+          )}
           role="application"
           ariaLabel="P-Werte Balkendiagramm"
           barAriaLabel={(e) => `${e.id}: ${formatNumberWithoutDecimals(e.value as number)} kWh`}
